@@ -1,0 +1,15 @@
+variables.json
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+*.tfvars
+.terraform/
+*.retry
+jdauphant.nginx
+vault.key
+*.swp
+key.json
+.env
+tls.crt
+tls.key
+Gitlab_ci
