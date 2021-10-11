@@ -13,3 +13,4 @@ key.json
 tls.crt
 tls.key
 Gitlab_ci
+commands
