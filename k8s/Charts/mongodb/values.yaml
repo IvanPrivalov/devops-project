@@ -1,14 +1,13 @@
 ---
-service:
-  internalPort: 8000
-  externalPort: 80
+image: mongo:3.2
 
-image:
-  repository: privalovip/crawler-ui
-  tag: latest
+persistence:
+  enabled: true
+  storageClass: "data-mongodb"
+  accessMode: ReadWriteOnce
+  size: 8Gi
 
-ingress:
-  class: nginx
-
-dbHost:
-dbPort:
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
