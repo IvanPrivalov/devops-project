@@ -1,0 +1,31 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crawler-ui
+  labels:
+    app: crawler
+    component: crawler-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crawler
+      component: crawler-ui
+  template:
+    metadata:
+      name: crawler-ui
+      labels:
+        app: crawler
+        component: crawler-ui
+    spec:
+      containers:
+      - image: privalovip/crawler-ui:latest
+        name: crawler-ui
+        env:
+        - name: MONGO_HOST
+          value: mongodb
+        - name: MONGO_PORT
+          value: "27017"
+        - name: FLASK_APP
+          value: ui.py

@@ -2,10 +2,10 @@ version: '3.3'
 
 services:
 
-  mongo_db:
+  mongodb:
     image: mongo:${MONGODB_VERSION}
     volumes:
-      - mongo_db:/data/db
+      - mongodb:/data/db
     networks:
       - services_network
 
@@ -27,7 +27,7 @@ services:
     build: ./crawler
     image: ${USERNAME}/crawler-bot:${CRAWLER_BOT_VERSION}
     depends_on:
-      - mongo_db
+      - mongodb
       - rabbitmq
     networks:
       - services_network
@@ -38,12 +38,12 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - mongo_db
+      - mongodb
     networks:
       - services_network
 
 volumes:
-  mongo_db:
+  mongodb:
 
 networks:
   services_network:

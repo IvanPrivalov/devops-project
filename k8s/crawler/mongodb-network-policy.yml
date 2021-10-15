@@ -1,0 +1,24 @@
+---
+  apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: deny-db-traffic
+    labels:
+      app: crawler
+  spec:
+    podSelector:
+      matchLabels:
+        app: crawler
+        component: mongodb
+    policyTypes:
+      - Ingress
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app: crawler
+            component: crawler-bot
+      - podSelector:
+          matchLabels:
+            app: crawler
+            component: crawler-ui

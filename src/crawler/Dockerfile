@@ -5,7 +5,7 @@ ADD . /app
 
 RUN pip install --no-cache-dir -r requirements.txt &&  pip install --no-cache-dir -r requirements-test.txt
 
-ENV MONGO mongo_db
+ENV MONGO mongodb
 ENV MONGO_PORT 27017
 ENV RMQ_HOST rabbitmq
 ENV RMQ_QUEUE rabbitmq

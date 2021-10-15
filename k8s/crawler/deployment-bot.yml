@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crawler-bot
+  labels:
+    app: crawler
+    component: crawler-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crawler
+      component: crawler-bot
+  template:
+    metadata:
+      name: crawler-bot
+      labels:
+        app: crawler
+        component: crawler-bot
+    spec:
+      containers:
+      - image: privalovip/crawler-bot:latest
+        name: crawler-bot
+        env:
+        - name: MONGO
+          value: mongodb
+        - name: RMQ_HOST
+          value: rabbitmq
+        - name: RMQ_QUEUE
+          value: rabbitmq
+        - name: RMQ_USERNAME
+          value: rabbitmq
+        - name: RMQ_PASSWORD
+          value: rabbitmq
+        - name: CHECK_INTERVAL
+          value: "60"
+        - name: EXCLUDE_URLS
+          value: .*github.com

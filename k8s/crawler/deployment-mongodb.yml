@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  labels:
+    app: crawler
+    component: mongodb
+    mongodb: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crawler
+      component: mongodb
+  template:
+    metadata:
+      name: mongodb
+      labels:
+        app: crawler
+        component: mongodb
+        mongodb: "true"
+    spec:
+      containers:
+      - image: mongo:3.2
+        name: mongodb
+        volumeMounts:
+        - name: mongodb
+          mountPath: /data/db
+      volumes:
+      - name: mongodb
+        emptyDir: {}
