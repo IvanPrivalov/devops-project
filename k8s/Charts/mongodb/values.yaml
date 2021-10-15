@@ -1,0 +1,14 @@
+---
+service:
+  internalPort: 8000
+  externalPort: 80
+
+image:
+  repository: privalovip/crawler-ui
+  tag: latest
+
+ingress:
+  class: nginx
+
+dbHost:
+dbPort:
