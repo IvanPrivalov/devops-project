@@ -1,0 +1,6 @@
+crawler-ui:
+  image:
+    repository: privalovip/crawler-ui
+    tag: latest
+  service:
+    externalPort: 8000

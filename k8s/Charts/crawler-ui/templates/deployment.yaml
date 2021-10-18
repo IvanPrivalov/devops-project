@@ -2,15 +2,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  name: {{ template "crawler-ui.fullname" . }}
   labels:
     app: crawler
     component: crawler-ui
     release: {{ .Release.Name }}
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: crawler
@@ -33,9 +31,9 @@ spec:
           protocol: TCP
         env:
         - name: MONGO_HOST
-          value: {{  .Values.db_host | default (printf "%s-mongodb" .Release.Name) }}
+          value: {{  .Values.dbhost | default (printf "%s-mongodb" .Release.Name) }}
         - name: MONGO_PORT
-          value: {{  .Values.db_port | default "27017" | quote }}
+          value: {{  .Values.dbport | default "27017" | quote }}
         - name: ENV
           valueFrom:
             fieldRef:

@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  name: {{ template "crawler-ui.fullname" . }}
 #  annotations:
 #    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
 spec:
@@ -14,6 +14,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ .Release.Name }}-{{ .Chart.Name }}
+            name: {{ template "crawler-ui.fullname" . }}
             port:
               number: {{ .Values.service.externalPort }}

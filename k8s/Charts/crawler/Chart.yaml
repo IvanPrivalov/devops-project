@@ -1,7 +1,7 @@
 ---
-name: mongodb
+name: crawler
 version: 1.0.0
-description: Search crawler UI
+description: OTUS crawler
 maintainers:
   - name: privalovip
     email: privalovip@gmail.com
