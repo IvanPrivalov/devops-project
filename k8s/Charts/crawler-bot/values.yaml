@@ -6,10 +6,3 @@ service:
 image:
   repository: privalovip/crawler-bot
   tag: latest
-
-dbhost:
-dbport:
-rmq_host:
-rmq_queue:
-rmq_username:
-rmq_password:

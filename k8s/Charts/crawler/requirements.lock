@@ -2,8 +2,14 @@ dependencies:
 - name: mongodb
   repository: file://../mongodb
   version: "3.2"
+- name: rabbitmq
+  repository: file://../rabbitmq
+  version: "3"
+- name: crawler-bot
+  repository: file://../crawler-bot
+  version: 1.0.0
 - name: crawler-ui
   repository: file://../crawler-ui
   version: 1.0.0
-digest: sha256:c29168e8b46e403a6988147d26b9a56cd5a12a23e371997638c5581e27a20dff
-generated: "2021-10-19T09:50:28.691548246+05:00"
+digest: sha256:5eba60aef9394d4118de6c5e4f19ed8ba4c5123f99bf1b76e3fe1ffa7026b84f
+generated: "2021-10-19T14:01:07.277015519+05:00"

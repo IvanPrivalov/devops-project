@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  labels:
+    app: crawler
+    component: rabbitmq
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crawler
+      component: rabbitmq
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      name: rabbitmq
+      labels:
+        app: crawler
+        component: rabbitmq
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - image: "{{ .Values.image }}"
+        name: rabbitmq
+        env:
+        - name: RMQ_PORT_INT
+          value: {{  .Values.rmq_portint | default "15672" | quote }}
+        - name: RMQ_PORT
+          value: {{  .Values.rmq_port | default "5672" | quote }}
+        - name: RABBITMQ_DEFAULT_USER
+          value: {{  .Values.rmq_username | default "rabbitmq" | quote }}
+        - name: RABBITMQ_DEFAULT_PASS
+          value: {{  .Values.rmq_password | default "rabbitmq" | quote }}

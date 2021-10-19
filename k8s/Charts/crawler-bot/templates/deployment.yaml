@@ -30,18 +30,20 @@ spec:
           name: crawler-bot
           protocol: TCP
         env:
-        - name: MONGO_HOST
-          value: {{  .Values.dbhost | default (printf "%s-mongodb" .Release.Name) }}
-        - name: MONGO_PORT
-          value: {{  .Values.dbport | default "27017" | quote }}
+        - name: MONGO
+          value: mongodb
         - name: RMQ_HOST
-          value: {{  .Values.rmq_host | default (printf "%s-rabbitmq" .Release.Name) }}
+          value: rabbitmq
         - name: RMQ_QUEUE
-          value: {{  .Values.rmq_queue | default "rabbitmq" | quote }}
+          value: rabbitmq
         - name: RMQ_USERNAME
-          value: {{  .Values.rmq_username | default "rabbitmq" | quote }}
+          value: rabbitmq
         - name: RMQ_PASSWORD
-          value: {{  .Values.rmq_password | default "rabbitmq" | quote }}
+          value: rabbitmq
+        - name: CHECK_INTERVAL
+          value: "60"
+        - name: EXCLUDE_URLS
+          value: .*github.com
         - name: ENV
           valueFrom:
             fieldRef:

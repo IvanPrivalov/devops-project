@@ -2,9 +2,9 @@ dependencies:
   - name: mongodb
     version: 3.2
     repository: file://../mongodb
-#  - name: rabbitmq
-#    version: 6.1.5
-#    repository: file://../rabbitmq
+  - name: rabbitmq
+    version: 3.0
+    repository: file://../rabbitmq
   - name: crawler-bot
     version: 1.0.0
     repository: file://../crawler-bot

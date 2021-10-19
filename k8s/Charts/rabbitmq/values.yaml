@@ -1,0 +1,7 @@
+---
+image: rabbitmq:3-management
+
+rmq_portint:
+rmq_port:
+rmq_username:
+rmq_password:
