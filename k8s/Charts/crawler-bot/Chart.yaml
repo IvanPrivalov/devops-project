@@ -1,0 +1,8 @@
+---
+name: crawler-bot
+version: 1.0.0
+description: Search crawler bot
+maintainers:
+  - name: privalovip
+    email: privalovip@gmail.com
+appVersion: 1.0

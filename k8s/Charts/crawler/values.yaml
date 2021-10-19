@@ -4,3 +4,10 @@ crawler-ui:
     tag: latest
   service:
     externalPort: 8000
+
+crawler-bot:
+  image:
+    repository: privalovip/crawler-bot
+    tag: latest
+  service:
+    externalPort: 8000

@@ -1,0 +1,8 @@
+---
+name: mongodb
+version: 3.2
+description: Crawler mongodb
+maintainers:
+  - name: privalovip
+    email: privalovip@gmail.com
+appVersion: 1.0
