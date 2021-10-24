@@ -177,4 +177,115 @@ make all
 - компонент приложения crawler-bot
 - приложение crawler
 
+```sh
+cd k8s/Charts
+```
 
+#### Компонент приложения mongodb
+
+За основу взят `mongo:3.2`
+
+Настройки хранятся в `k8s/Charts/mongodb/values.yaml`
+
+#### Компонент приложения nginx-ingress
+
+За основу взят `stable/nginx-ingress` https://github.com/kubernetes/ingress-nginx
+
+Настройки хранятся в `k8s/Charts/nginx-ingress/values.yaml`
+
+#### Компонент приложения rabbitmq
+
+За основу взят `rabbitmq:3-management`
+
+Настройки хранятся в `k8s/Charts/rabbitmq/values.yaml`
+
+#### Компонент приложения crawler-ui
+
+Helm chart для компонента приложения crawler-ui создан в директории `k8s/Charts/crawler-ui`
+
+#### Компонент приложения crawler-bot
+
+Helm chart для компонента приложения crawler-bot создан в директории `k8s/Charts/crawler-bot`
+
+#### Приложение crawler
+
+Главный helm chart приложения, который включает все компоненты приложения со всеми зависимостями.
+
+Загрузка зависимостей в helm chart приложения:
+
+```sh
+cd k8s/Charts/crawler
+helm dep update
+```
+
+## Развертывание приложения в kubernetes
+
+### Развертывание приложения crawler
+
+Развернуть приложения в кластере kubernetes можно с использованием подготовленных helm charts:
+
+- по отдельности каждый компонент.
+- все приложение через главный helm chart приложения.
+
+Пример развертывания отдельного компонента приложения:
+
+```sh
+cd k8s/Charts
+helm upgrade --install --namespace=production mongodb mongodb/
+helm upgrade --install --namespace=production nginx-ingress nginx-ingress/
+helm upgrade --install --namespace=production rabbitmq rabbitmq/
+helm upgrade --install --namespace=production crawler-ui crawler-ui/
+helm upgrade --install --namespace=production crawler-bot crawler-bot/
+```
+
+Развертывание приложения со всеми зависимостями:
+
+```sh
+cd k8s/Charts/crawler
+
+#обновляем изменения в зависимостях
+helm dep update
+
+#устанавливаем приложение
+helm upgrade --install --namespace=production production crawler/
+```
+
+Проверка:
+
+```sh
+kubectl get pods -n production
+
+NAME                                                        READY   STATUS    RESTARTS   AGE
+mongodb-6f5db597c4-fm5fm                                    1/1     Running   0          5h42m
+production-crawler-bot-5c89c744bc-bflq7                     1/1     Running   3          84m
+production-crawler-ui-5cbc6566cd-9tmf2                      1/1     Running   0          84m
+production-nginx-ingress-controller-8484b488d6-xzr2z        1/1     Running   0          5h42m
+production-nginx-ingress-default-backend-76b66b5d45-gdl92   1/1     Running   0          5h42m
+rabbitmq-6fd4f67648-fhcbz                                   1/1     Running   0          5h42m
+```
+
+```sh
+helm list -A
+
+NAME      	NAMESPACE          	REVISION	UPDATED                                	STATUS  	CHART               	APP VERSION
+production	production         	7       	2021-10-24 16:44:00.444146869 +0000 UTC	deployed	crawler-1.0.1       	1          
+runner    	gitlab-managed-apps	1       	2021-10-21 16:04:32.907283137 +0000 UTC	deployed	gitlab-runner-0.24.0	13.7.0
+```
+
+Приложение доступно по ссылке http://crawler.3ddiamond.ru/
+
+![image 6](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_6.png)
+
+## GitLab CI/CD
+
+### Настройка интеграции GitLab с Kubernetes
+
+В Admin Area > Kubernetes добавляем существующий кластер.
+
+В GitLab входит справка, по нажатию More information под полем, для получения нужной информации для интеграции. Выполнено в соответствии с руководством.
+
+- Получаем API URL:
+
+```sh
+
+```
