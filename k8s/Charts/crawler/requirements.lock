@@ -11,5 +11,8 @@ dependencies:
 - name: crawler-ui
   repository: file://../crawler-ui
   version: 1.0.0
-digest: sha256:5eba60aef9394d4118de6c5e4f19ed8ba4c5123f99bf1b76e3fe1ffa7026b84f
-generated: "2021-10-19T14:01:07.277015519+05:00"
+- name: nginx-ingress
+  repository: file://../nginx-ingress
+  version: 1.41.3
+digest: sha256:b1756fce2878b31f0ba9ca436c47462bff7b13e62a0514216395b2dd9c688186
+generated: "2021-10-24T19:46:05.912878835+05:00"

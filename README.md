@@ -29,6 +29,100 @@ ____
  - How to start (по ходу README)
  - CHANGELOG с описанием выполненной работы
 
+### Ссылки на сервисы проекта:
+____
+
+| Сервис                                | Ссылка                           |
+| ------------------------------------- | -------------------------------- |
+| Приложение поиска (prod)              | http://crawler.3ddiamond.ru/     |
+| Gitlab                                | http://gitlab.3ddiamond.ru       |
+| Grafana                               |                                  |
+| Prometheus                            |                                  |
+
+## Подготовка инфраструктуры с использованием trerraform
+____
+
+Инфраструктура разворачивается с помощью terraform в Yandex.Cloud, для этого подними k8s в Yandex.Cloud.
+
+```sh
+cd infra/k8s-terraform/
+terraform init
+terraform apply
+```
+
+Типы серверов реализованы модулями, и включают:
+
+- ВМ для k8s master;
+- ВМ для k8s node и LoadBalancer для k8s node;
+
+![image 5](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_5.png)
+
+## Удаленное управление kubernetes
+
+Для удаленного управления kubernetes понадобится kubectl и helm.
+
+### kubectl
+
+Установка kubectl:
+
+```sh
+cd /tmp
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.14.3/bin/linux/amd64/kubectl
+
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+```
+
+Создаем кластер и группу хостов. Подключаемся к кластеру::
+
+```sh
+yc managed-kubernetes cluster get-credentials k8s-cluster --external --force
+```
+
+Проверим подключение к нашему кластеру:
+
+```sh
+kubectl config current-context
+```
+
+Проверка:
+
+```sh
+kubectl get nodes
+NAME                        STATUS   ROLES    AGE     VERSION
+cl1aegvuf5dubg8rr3am-inel   Ready    <none>   6d11h   v1.19.15
+cl1aegvuf5dubg8rr3am-ufer   Ready    <none>   6d11h   v1.19.15
+```
+
+### Helm
+
+Установка helm:
+
+```sh
+sudo curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+```
+
+Добавим репо:
+
+```sh
+helm repo add stable https://charts.helm.sh/stable && helm repo add incubator https://charts.helm.sh/incubator && helm repo add harbor https://helm.goharbor.io && helm repo update
+```
+
+Проверка:
+
+```sh
+helm version
+version.BuildInfo{Version:"v3.7.0", GitCommit:"eeac83883cb4014fe60267ec6373570374ce770b", GitTreeState:"clean", GoVersion:"go1.16.8"}
+```
+
+## Развертывание GitLab
+
+В рамках проекта развернут GitLab на отдельном сервере.
+
+Для установки GitLab в Yandex.Cloud используйте официальную инструкцию [https://cloud.yandex.ru/docs](https://cloud.yandex.ru/docs/solutions/infrastructure-management/gitlab-containers)
+
+![image 4](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_4.png)
+
 ## Подготовка приложения
 ____
 
@@ -64,8 +158,23 @@ docker-compose up -d
 
 cd src
 
+# собрать и запушить все образы
 make all
 
 ```
 
 ![image 3](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_3.png)
+
+
+### Создание Helm Charts
+
+Созданы Helm Charts для каждого из компонентов приложения и главный Helm Chart приложения:
+
+- компонент приложения mongodb
+- компонент приложения nginx-ingress
+- компонент приложения rabbitmq
+- компонент приложения crawler-ui
+- компонент приложения crawler-bot
+- приложение crawler
+
+

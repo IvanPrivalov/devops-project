@@ -1,0 +1,258 @@
+image: alpine:latest
+
+stages:
+  - build
+  - test
+  - review
+  - release
+  - cleanup
+  - production
+
+build:
+  stage: build
+  image: docker:git
+  services:
+    - docker:18.09.7-dind
+  script:
+    - setup_docker
+    - build
+  variables:
+    DOCKER_DRIVER: overlay2
+  only:
+    - branches
+
+test:
+  stage: test
+  script:
+    - exit 0
+  only:
+    - branches
+
+release:
+  stage: release
+  image: docker
+  services:
+    - docker:18.09.7-dind
+  script:
+    - setup_docker
+    - release
+  only:
+    - master
+
+review:
+  stage: review
+  script:
+    - install_dependencies
+    - ensure_namespace
+    - deploy
+  variables:
+    KUBE_NAMESPACE: review
+    INGRESS_HOSTNAME_SEARCH_UI: ${CI_ENVIRONMENT_SLUG}.${KUBE_INGRESS_BASE_DOMAIN}
+  environment:
+    name: review/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME
+    url: http://${CI_ENVIRONMENT_SLUG}.${KUBE_INGRESS_BASE_DOMAIN}
+    on_stop: stop_review
+  only:
+    refs:
+      - branches
+    kubernetes: active
+  except:
+    - master
+
+stop_review:
+  stage: cleanup
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - install_dependencies
+    - delete
+  environment:
+    name: review/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME
+    action: stop
+  when: manual
+  allow_failure: true
+  only:
+    refs:
+      - branches
+    kubernetes: active
+  except:
+    - master
+
+production:
+  stage: production
+  script:
+    - install_dependencies
+    - ensure_namespace
+    - deploy
+  variables:
+    KUBE_NAMESPACE: production
+    INGRESS_HOSTNAME_SEARCH_UI: crawler.3ddiamond.ru
+  environment:
+    name: production
+    url: http://crawler.3ddiamond.ru
+  only:
+    refs:
+      - master
+
+.auto_devops: &auto_devops |
+  # Auto DevOps variables and functions
+  [[ "$TRACE" ]] && set -x
+  export CI_REGISTRY="index.docker.io"
+  export CI_BIN_REPO_OWNER=$CI_REGISTRY/$CI_REGISTRY_USER
+  export CI_APPLICATION_NAME_UI=crawler-ui
+  export CI_APPLICATION_NAME_CRAWLER=crawler-bot
+  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY/$CI_PROJECT_PATH
+  export CI_APPLICATION_TAG=$CI_COMMIT_REF_SLUG
+  export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
+  export TILLER_NAMESPACE="kube-system"
+  echo "CI_BIN_REPO_OWNER=${CI_BIN_REPO_OWNER}"
+  echo "CI_APPLICATION_TAG=${CI_APPLICATION_TAG}"
+  echo "CI_CONTAINER_NAME=${CI_CONTAINER_NAME}"
+
+  function setup_docker() {
+    echo "Setup docker"
+
+    if ! docker info &>/dev/null; then
+      if [ -z "$DOCKER_HOST" -a "$KUBERNETES_PORT" ]; then
+        export DOCKER_HOST='tcp://localhost:2375'
+      fi
+    fi
+  }
+
+  function build() {
+    echo "Building Dockerfile-based application..."
+
+    echo `git show --format="%h" HEAD | head -1` > build_info.txt
+    echo `git rev-parse --abbrev-ref HEAD` >> build_info.txt
+    docker build -t "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_UI}:$CI_APPLICATION_TAG" services/crawler-ui
+    docker build -t "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_CRAWLER}:$CI_APPLICATION_TAG" services/crawler-bot
+    echo ""
+
+    if [[ -n "$CI_REGISTRY_USER" ]]; then
+      echo "Logging to GitLab Container Registry with CI credentials..."
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+      echo ""
+    fi
+
+    echo "Pushing to GitLab Container Registry..."
+    docker push "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_UI}:$CI_APPLICATION_TAG"
+    docker push "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_CRAWLER}:$CI_APPLICATION_TAG"
+    echo ""
+  }
+
+  function deploy() {
+    echo "Deploy"
+
+    track="${1-stable}"
+    name="$CI_ENVIRONMENT_SLUG"
+    echo "track="$track
+    echo "name="$name
+
+    if [[ "$track" != "stable" ]]; then
+      name="$name-$track"
+      echo "name="$name
+    fi
+
+    echo "Clone deploy repository..."
+    git clone http://gitlab.3ddiamond.ru/$CI_PROJECT_NAMESPACE/crawler-deploy.git
+
+    echo "Download helm dependencies..."
+    helm dep update crawler-deploy/crawler
+
+    echo "Deploy helm release $name to $KUBE_NAMESPACE"
+    helm upgrade --install \
+      --wait \
+      --set crawler-ui.ingress.hostName="$INGRESS_HOSTNAME_SEARCH_UI" \
+      --set crawler-ui.image.tag="$(curl http://gitlab.3ddiamond.ru/$CI_PROJECT_NAMESPACE/crawler-ui/raw/master/VERSION)" \
+      --set crawler-bot.image.tag="$(curl http://gitlab.3ddiamond.ru/$CI_PROJECT_NAMESPACE/crawler-bot/raw/master/VERSION)" \
+      --namespace="$KUBE_NAMESPACE" \
+      --version="$CI_PIPELINE_ID-$CI_JOB_ID" \
+      "$name" \
+     crawler-deploy/crawler
+  }
+
+  function release() {
+    echo "Updating docker images ..."
+
+    if [[ -n "$CI_REGISTRY_USER" ]]; then
+      echo "Logging to GitLab Container Registry with CI credentials..."
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+      echo ""
+    fi
+
+    docker pull "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_UI}:$CI_APPLICATION_TAG"
+    docker tag "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_UI}:$CI_APPLICATION_TAG" "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_UI}:$(cat services/crawler-ui/VERSION)"
+    docker push "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_UI}:$(cat services/crawler-ui/VERSION)"
+
+    docker pull "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_CRAWLER}:$CI_APPLICATION_TAG"
+    docker tag "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_CRAWLER}:$CI_APPLICATION_TAG" "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_CRAWLER}:$(cat services/crawler-bot/VERSION)"
+    docker push "${CI_BIN_REPO_OWNER}/${CI_APPLICATION_NAME_CRAWLER}:$(cat services/crawler-bot/VERSION)"
+
+    echo ""
+  }
+
+  function install_dependencies() {
+
+    apk add -U openssl curl tar gzip bash ca-certificates git
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.23-r3/glibc-2.23-r3.apk
+    apk add glibc-2.23-r3.apk
+    rm glibc-2.23-r3.apk
+
+    curl https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz | tar zx
+
+    mv linux-amd64/helm /usr/bin/
+    helm version --client
+
+    curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    chmod +x /usr/bin/kubectl
+    kubectl version --client
+  }
+
+  function ensure_namespace() {
+    kubectl describe namespace "$KUBE_NAMESPACE" || kubectl create namespace "$KUBE_NAMESPACE"
+  }
+
+  function deploy() {
+    echo "Deploy"
+
+    track="${1-stable}"
+    name="$CI_ENVIRONMENT_SLUG"
+    echo "track="$track
+    echo "name="$name
+
+    if [[ "$track" != "stable" ]]; then
+      name="$name-$track"
+      echo "name="$name
+    fi
+
+    echo "Clone deploy repository..."
+    git clone http://gitlab.3ddiamond.ru/privalovip/crawler-deploy.git
+
+    echo "Download helm dependencies..."
+    helm dep update helm/crawler
+
+    echo "Deploy helm release $name to $KUBE_NAMESPACE"
+    helm upgrade --install \
+      --wait \
+      --set crawler-ui.ingress.hostName="$INGRESS_HOSTNAME_SEARCH_UI" \
+      --set crawler-ui.image.tag=$CI_APPLICATION_TAG \
+      --set crawler-bot.image.tag=$CI_APPLICATION_TAG \
+      --namespace="$KUBE_NAMESPACE" \
+      --version="$CI_PIPELINE_ID-$CI_JOB_ID" \
+      "$name" \
+     helm/crawler
+  }
+
+  function delete() {
+    echo "Delete"
+
+    track="${1-stable}"
+    name="$CI_ENVIRONMENT_SLUG"
+    echo "track="$track
+    echo "name="$name
+    helm delete "$name" -n "$KUBE_NAMESPACE" helm/crawler || true
+  }
+
+before_script:
+  - *auto_devops
