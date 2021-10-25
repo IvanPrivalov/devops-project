@@ -287,5 +287,114 @@ runner    	gitlab-managed-apps	1       	2021-10-21 16:04:32.907283137 +0000 UTC	
 - Получаем API URL:
 
 ```sh
+kubectl cluster-info | grep -E 'Kubernetes master|Kubernetes control plane' | awk '/http/ {print $NF}'
+https://193.32.218.46
+```
+
+- Получаем CA certificate:
+
+```sh
+kubectl get secrets|grep -iE "name|default-token"
+NAME                  TYPE                                  DATA   AGE
+default-token-stkm6   kubernetes.io/service-account-token   3      3d5h
+
+kubectl get secret default-token-stkm6 -o jsonpath="{['data']['ca\.crt']}" | base64 --decode
+
+-----BEGIN CERTIFICATE-----
+MIIC5zCCAc+gAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl
+cm5ldGVzMB4XDTIxMTAxODA1MzYxMVoXDTMxMTAxNjA1MzYxMVowFTETMBEGA1UE
+AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALVo
+L0O9Sj5ixaEBSrG09NvcqW9sQbG9SOY4v8hq5BejlQiiNrkZCvg0jVAdn3x4oc0C
+...
+Lq2YiFQavwjjGdqaw7w/xuYBKL7V2NyRCR4FoQgCOvW925XCWM9EBVsg6Wc2jjrA
+3HLVru/3XMFZ89dYKm98o9FzNIZ/K9ukTU08xdNpvbRDqJL1tMozV+HHMmyY7mUN
+WmrPEU0oeQP638jTGl+51tXMYDU7Pjbqqco+/YNjD9UYR2gaOmYENUs/2OSEFRl6
+OMMNCC+XN71WiNpL46VtWucGePgkplyXTDxc
+-----END CERTIFICATE-----
+```
+
+- Получаем Service Token
+
+```sh
+
+# Применяем манифест с пользователем `gitlab`
+
+cd k8s/GitLab
+kubectl apply -f gitlab-admin-service-account.yaml
+
+# Получаем token  пользователя `gitlab`
+
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab | awk '{print $1}')
+
+Name:         gitlab-token-vgfhr
+Namespace:    kube-system
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: gitlab
+              kubernetes.io/service-account.uid: 22010e9a-1220-4dd9-80cf-49d79057a609
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1066 bytes
+namespace:  11 bytes
 
 ```
+
+- Указываем полученную информацию, завершаем интеграцию.
+
+  > Снять галку с `GitLab-managed cluster`, иначе GitLab вместо использования учетной записи `gitlab` будет создавать дополнительные сервисные аккаунты и пытаться развернуть приложения с использованием этих сервисных аккаунтов.
+
+![image 7](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_7.png)
+
+- В Application устанавливаем 
+
+  - GitLab Runner
+
+- Проверка:
+
+```sh
+
+kubectl get pods -n gitlab-managed-apps
+NAME                                   READY   STATUS    RESTARTS   AGE
+runner-gitlab-runner-dfcb8774b-68482   1/1     Running   0          3d12h
+
+```
+
+### CI/CD
+
+В CI/CD реализованы следующие этапы (stages):
+
+- build - сборка приложения;
+
+- test - тестирование приложения (в данном этапе функционирует заглушка);
+
+- review - обзор и проверка приложения;
+
+- release - отправка образов на Docker Hub;
+
+- cleanup - очистка окружения review, выполняется в ручную по кнопке в pipeline;
+
+- production- развертывание приложения в окружении prod, приложение доступно по ссылке http://crawler.3ddiamond.ru/.
+
+Общий принцип работы CI/CD:
+
+- коммит в branch 
+
+  - автоматически выполняются этапы build/test/review;
+  - в ручную в pipeline выполняется cleanup (stop_review).
+
+- коммит в master
+
+  - автоматически выполняются этапы build/test/release/production;
+
+
+
+
+
+
+
+
+
+
+
