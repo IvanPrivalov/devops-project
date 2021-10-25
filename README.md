@@ -35,7 +35,7 @@ ____
 | Сервис                                | Ссылка                           |
 | ------------------------------------- | -------------------------------- |
 | Приложение поиска (prod)              | http://crawler.3ddiamond.ru/     |
-| Gitlab                                | http://gitlab.3ddiamond.ru       |
+| Gitlab                                | http://gitlab.3ddiamond.ru/       |
 | Grafana                               |                                  |
 | Prometheus                            |                                  |
 
@@ -117,11 +117,13 @@ version.BuildInfo{Version:"v3.7.0", GitCommit:"eeac83883cb4014fe60267ec637357037
 
 ## Развертывание GitLab
 
-В рамках проекта развернут GitLab на отдельном сервере.
+В рамках проекта развернут GitLab на отдельном сервере http://gitlab.3ddiamond.ru/
+
+![image 4](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_4.png)
 
 Для установки GitLab в Yandex.Cloud используйте официальную инструкцию [https://cloud.yandex.ru/docs](https://cloud.yandex.ru/docs/solutions/infrastructure-management/gitlab-containers)
 
-![image 4](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_4.png)
+![image 8](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_8.png)
 
 ## Подготовка приложения
 ____
