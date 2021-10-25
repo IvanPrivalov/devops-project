@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongodb
+  name: {{ template "mongodb.fullname" . }}
   labels:
     app: crawler
     component: mongodb
@@ -32,3 +32,5 @@ spec:
           mountPath: /data/db
       volumes:
       - name: data
+        persistentVolumeClaim:
+          claimName:  mongo-pvc
