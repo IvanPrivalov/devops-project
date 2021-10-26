@@ -37,7 +37,6 @@ ____
 | Приложение поиска (prod)              | http://crawler.3ddiamond.ru/     |
 | Gitlab                                | http://gitlab.3ddiamond.ru/      |
 | Grafana                               | http://grafana.3ddiamond.ru/     |
-| Prometheus                            |                                  |
 
 ## Подготовка инфраструктуры с использованием trerraform
 ____
@@ -171,8 +170,7 @@ helm pull prometheus-community/kube-prometheus-stack --version 19.2.2 --untar
 - провайдера dashboards;
 - базовые dashboards;
 
-Импортирован dashboard [K8S Cluster Monitor
-] (http://grafana.3ddiamond.ru/d/4b545447f/k8s-cluster-monitor?orgId=1&refresh=10s&from=1635213199398&to=1635223999398)
+Импортирован dashboard [K8S Cluster Monitor] (http://grafana.3ddiamond.ru/d/4b545447f/k8s-cluster-monitor?orgId=1&refresh=10s&from=1635213199398&to=1635223999398)
 
 ![image 11](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_11.png)
 
