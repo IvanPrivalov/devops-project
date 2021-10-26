@@ -35,8 +35,8 @@ ____
 | Сервис                                | Ссылка                           |
 | ------------------------------------- | -------------------------------- |
 | Приложение поиска (prod)              | http://crawler.3ddiamond.ru/     |
-| Gitlab                                | http://gitlab.3ddiamond.ru/       |
-| Grafana                               |                                  |
+| Gitlab                                | http://gitlab.3ddiamond.ru/      |
+| Grafana                               | http://grafana.3ddiamond.ru/     |
 | Prometheus                            |                                  |
 
 ## Подготовка инфраструктуры с использованием trerraform
@@ -124,6 +124,75 @@ version.BuildInfo{Version:"v3.7.0", GitCommit:"eeac83883cb4014fe60267ec637357037
 Для установки GitLab в Yandex.Cloud используйте официальную инструкцию [https://cloud.yandex.ru/docs](https://cloud.yandex.ru/docs/solutions/infrastructure-management/gitlab-containers)
 
 ![image 8](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_8.png)
+
+## Развертывание Prometheus, Grafana, Alertmanager
+
+За основу взят `kube-prometheus-stack` https://prometheus-community.github.io/helm-charts
+
+Получаем kube-prometheus-stack на локальный диск
+
+```sh
+cd k8s/Helm
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm pull prometheus-community/kube-prometheus-stack --version 19.2.2 --untar
+```
+
+### Настройки Prometheus хранятся в `k8s/helm/kube-prometheus-stack/values.yaml`
+
+Включены модули:
+
+- alertmanager;
+- kubeStateMetrics;
+- nodeExporter;
+
+Для prometheus сервера настроено:
+
+- включены jobs
+  - job_name: prometheus
+  - job_name: 'kubernetes-apiservers'
+  - job_name: 'kubernetes-nodes'
+  - job_name: 'kubernetes-nodes-cadvisor'
+  - job_name: 'kubernetes-service-endpoints'
+  - job_name: 'prometheus-pushgateway'
+  - job_name: 'kubernetes-services'
+  - job_name: 'kubernetes-pods'
+
+![image 9](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_9.png)
+
+![image 10](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_10.png)
+
+### Настройки Grafana хранятся в `k8s/helm/charts/grafana/values.yaml`
+
+Настраиваем:
+
+- ingress;
+- datasource Prometheus по умолчанию;
+- провайдера dashboards;
+- базовые dashboards;
+
+Импортирован dashboard [K8S Cluster Monitor
+] (http://grafana.3ddiamond.ru/d/4b545447f/k8s-cluster-monitor?orgId=1&refresh=10s&from=1635213199398&to=1635223999398)
+
+![image 11](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_11.png)
+
+### Настройки Alertmanager хранятся в `k8s/helm/kube-prometheus-stack/values.yaml`
+
+Для alertmanager настроено:
+
+- интеграция со slack каналом;
+
+![image 12](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_12.png)
+
+![image 13](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_13.png)
+
+Устанавливаем kube-prometheus-stack:
+
+```sh
+helm upgrade --install kube-prometheus-stack kube-prometheus-stack/
+```
+
+Grafana доступен по ссылке http://grafana.3ddiamond.ru/
 
 ## Подготовка приложения
 ____
