@@ -140,37 +140,6 @@ production:
     echo ""
   }
 
-  function deploy() {
-    echo "Deploy"
-
-    track="${1-stable}"
-    name="$CI_ENVIRONMENT_SLUG"
-    echo "track="$track
-    echo "name="$name
-
-    if [[ "$track" != "stable" ]]; then
-      name="$name-$track"
-      echo "name="$name
-    fi
-
-    echo "Clone deploy repository..."
-    git clone http://gitlab.3ddiamond.ru/$CI_PROJECT_NAMESPACE/crawler-deploy.git
-
-    echo "Download helm dependencies..."
-    helm dep update crawler-deploy/crawler
-
-    echo "Deploy helm release $name to $KUBE_NAMESPACE"
-    helm upgrade --install \
-      --wait \
-      --set crawler-ui.ingress.hostName="$INGRESS_HOSTNAME_SEARCH_UI" \
-      --set crawler-ui.image.tag="$(curl http://gitlab.3ddiamond.ru/$CI_PROJECT_NAMESPACE/crawler-ui/raw/master/VERSION)" \
-      --set crawler-bot.image.tag="$(curl http://gitlab.3ddiamond.ru/$CI_PROJECT_NAMESPACE/crawler-bot/raw/master/VERSION)" \
-      --namespace="$KUBE_NAMESPACE" \
-      --version="$CI_PIPELINE_ID-$CI_JOB_ID" \
-      "$name" \
-     crawler-deploy/crawler
-  }
-
   function release() {
     echo "Updating docker images ..."
 
