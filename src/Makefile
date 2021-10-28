@@ -8,7 +8,7 @@ all : docker-build-crawler-bot docker-push-crawler-bot docker-build-crawler-ui d
 .PHONY : all
 
 ######################################
-# CRAWLER
+# CRAWLER-BOT
 docker-build-crawler-bot:
 	cd ./crawler && ./docker_build.sh
 
@@ -16,7 +16,7 @@ docker-push-crawler-bot:
 	docker login && docker push $(USER_NAME)/crawler-bot:$(APP_CRAWLER_VERSION)
 
 ######################################
-# SEARCH-UI
+# CRAWLER-UI
 docker-build-crawler-ui:
 	cd ./ui && ./docker_build.sh
 
