@@ -205,8 +205,8 @@ production:
     helm upgrade --install \
       --wait \
       --set crawler-ui.ingress.hostName="$INGRESS_HOSTNAME_SEARCH_UI" \
-      --set crawler-ui.image.tag=$CI_APPLICATION_TAG \
-      --set crawler-bot.image.tag=$CI_APPLICATION_TAG \
+      --set crawler-ui.image.tag="$(cat services/crawler-ui/VERSION)" \
+      --set crawler-bot.image.tag="$(cat services/crawler-bot/VERSION)" \
       --namespace="$KUBE_NAMESPACE" \
       --version="$CI_PIPELINE_ID-$CI_JOB_ID" \
       "$name" \
