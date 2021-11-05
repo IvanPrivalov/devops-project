@@ -29,6 +29,28 @@ ____
  - How to start (по ходу README)
  - CHANGELOG с описанием выполненной работы
 
+### Описание приложения.
+
+Дано:
+
+- Простое микросервисное приложение
+- База данных
+- Менеджер очередей сообщений
+
+Пример сайта для парсинга:
+
+[Crawler] (https://github.com/express42/search_engine_crawler)
+
+[UI] (https://github.com/express42/search_engine_ui)
+
+#### Архитектура приложения.
+
+![image 14](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_14.png)
+
+![image 15](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_15.png)
+
+![image 16](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_16.png)
+
 ### Ссылки на сервисы проекта:
 ____
 
