@@ -39,9 +39,9 @@ ____
 
 Пример сайта для парсинга:
 
-[Crawler] (https://github.com/express42/search_engine_crawler)
+[Crawler](https://github.com/express42/search_engine_crawler)
 
-[UI] (https://github.com/express42/search_engine_ui)
+[UI](https://github.com/express42/search_engine_ui)
 
 #### Архитектура приложения.
 
@@ -192,7 +192,7 @@ helm pull prometheus-community/kube-prometheus-stack --version 19.2.2 --untar
 - провайдера dashboards;
 - базовые dashboards;
 
-Импортирован dashboard [K8S Cluster Monitor] (http://grafana.3ddiamond.ru/d/4b545447f/k8s-cluster-monitor?orgId=1&refresh=10s&from=1635213199398&to=1635223999398)
+Импортирован dashboard [K8S Cluster Monitor](http://grafana.3ddiamond.ru/d/4b545447f/k8s-cluster-monitor?orgId=1&refresh=10s&from=1635213199398&to=1635223999398)
 
 ![image 11](https://github.com/IvanPrivalov/devops-project/blob/main/Screens/Screen_11.png)
 
